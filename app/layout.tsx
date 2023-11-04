@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 import NavBar from "@/components/header/NavBar";
 import TRPCProvider from "@/components/providers/TRPCProvider";
 import ThemeProvider from "@/components/providers/ThemeProvider";
+import { Toaster } from "@/components/ui/toaster";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -28,6 +29,7 @@ export default function RootLayout({
             enableSystem
             disableTransitionOnChange
           >
+            <Toaster />
             <NavBar />
             {children}
           </ThemeProvider>

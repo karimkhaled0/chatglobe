@@ -8,11 +8,9 @@ import { format } from "date-fns";
 import { Button } from "../ui/button";
 import { useState } from "react";
 
-type Props = {
-  subscriptionPlan?: string;
-};
+type Props = {};
 
-const Dashboard = ({ subscriptionPlan }: Props) => {
+const Dashboard = (props: Props) => {
   const [currentlyDeletingFile, setCurrentlyDeletingFile] = useState<
     string | null
   >(null);
