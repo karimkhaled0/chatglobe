@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Logo from "./Logo";
+import { Button } from "../ui/button";
 
 type Props = {};
 
@@ -29,20 +30,17 @@ const Footer = (props: Props) => {
           <div className="flex items-center justify-center">
             <Logo />
           </div>
-          <p>
+          <p className="text-gray-800 dark:text-gray-400">
             ChatGlobe is a chat application that allows you to chat with People
             or Docs in any language.
           </p>
           <div className="items-center gap-x-3 space-y-3 sm:flex sm:justify-center sm:space-y-0">
-            <Link
-              href="/dashboard"
-              className="block py-2 px-4 text-center text-white font-medium bg-indigo-600 duration-150 hover:bg-indigo-500 active:bg-indigo-700 rounded-lg shadow-lg hover:shadow-none"
-            >
-              Let{"'"}s get started
+            <Link href="/dashboard">
+              <Button variant={"default"}>Let{"'"}s get started</Button>
             </Link>
             <Link
               href="/pricing"
-              className="flex items-center justify-center gap-x-2 py-2 px-4 text-gray-700 hover:text-gray-500 font-medium duration-150 active:bg-gray-100 border rounded-lg md:inline-flex"
+              className="flex items-center justify-center gap-x-2 py-2 px-4 text-gray-700 dark:text-gray-400 hover:text-gray-500 font-medium duration-150 active:bg-gray-100 border rounded-lg md:inline-flex"
             >
               Get access
               <svg
@@ -66,9 +64,11 @@ const Footer = (props: Props) => {
             {footerNavs.map((item, idx) => (
               <li
                 key={idx}
-                className="text-gray-800 hover:text-gray-500 duration-150"
+                className="text-gray-800 dark:text-gray-400 hover:text-gray-500 duration-150"
               >
-                <a href={item.href}>{item.name}</a>
+                <Link href={item.href} target="_blank">
+                  {item.name}
+                </Link>
               </li>
             ))}
           </ul>

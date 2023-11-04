@@ -3,14 +3,21 @@ import MaxWidthWrapper from "../providers/MaxWidthWrapper";
 import { buttonVariants } from "../ui/button";
 import { ArrowRight } from "lucide-react";
 import Logo from "./Logo";
-import { LoginLink, RegisterLink } from "@kinde-oss/kinde-auth-nextjs/server";
+import {
+  LoginLink,
+  RegisterLink,
+  getKindeServerSession,
+} from "@kinde-oss/kinde-auth-nextjs/server";
+import UserAccountNav from "./UserAccountNav";
+import DarkModeToggle from "./DarkModeToggle";
 
 type Props = {};
 
 const NavBar = (props: Props) => {
-  const user = false;
+  const { getUser } = getKindeServerSession();
+  const user = getUser();
   return (
-    <nav className="sticky h-20 inset-x-0 top-0 z-30 w-full border-b border-gray-200 bg-white/75 backdrop-blur-lg transition-all">
+    <nav className="sticky h-20 inset-x-0 top-0  dark:bg-black/75 z-30 w-full border-b border-gray-200 bg-white/75 backdrop-blur-lg transition-all">
       <MaxWidthWrapper>
         <div className="flex h-20 items-center justify-between border-b border-zinc-200">
           <Logo />
@@ -18,6 +25,7 @@ const NavBar = (props: Props) => {
           {/* <MobileNav isAuth={!!user} /> */}
 
           <div className="hidden items-center space-x-4 sm:flex">
+            <DarkModeToggle />
             {!user ? (
               <>
                 <Link
@@ -50,7 +58,7 @@ const NavBar = (props: Props) => {
                 <Link
                   href="/dashboard"
                   className={buttonVariants({
-                    variant: "ghost",
+                    variant: "outline",
                     size: "sm",
                   })}
                 >
