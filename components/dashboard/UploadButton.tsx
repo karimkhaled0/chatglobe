@@ -13,9 +13,11 @@ import { trpc } from "@/app/_trpc/client";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 
-type Props = {};
+type Props = {
+  seIsOpen: (isOpen: boolean) => void;
+};
 
-const UploadDropzone = (props: Props) => {
+const UploadDropzone = ({ seIsOpen }: Props) => {
   const router = useRouter();
 
   const [isUploading, setIsUploading] = useState<boolean>(false);
@@ -69,6 +71,7 @@ const UploadDropzone = (props: Props) => {
         const res = await startUpload(acceptedFile);
 
         if (!res) {
+          seIsOpen(false);
           return toast({
             title: "Something went wrong",
             description: "Please try again later",
@@ -81,6 +84,7 @@ const UploadDropzone = (props: Props) => {
         const key = fileResponse?.key;
 
         if (!key) {
+          seIsOpen(false);
           return toast({
             title: "Something went wrong",
             description: "Please try again later",
@@ -102,15 +106,17 @@ const UploadDropzone = (props: Props) => {
           <div className="flex items-center justify-center h-full w-full">
             <label
               htmlFor="dropzone-file"
-              className="flex flex-col items-center justify-center w-full h-full rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100"
+              className="flex flex-col items-center justify-center w-full h-full rounded-lg cursor-pointer bg-gray-50 dark:bg-muted hover:bg-gray-100"
             >
               <div className="flex flex-col items-center justify-center pt-5 pb-6">
                 <Cloud className="h-6 w-6 text-zinc-500 mb-2" />
-                <p className="mb-2 text-sm text-zinc-700">
+                <p className="mb-2 text-sm text-zinc-700 dark:text-zinc-200">
                   <span className="font-semibold">Click to upload</span> or drag
                   and drop
                 </p>
-                <p className="text-xs text-zinc-500">PDF (up to 4MB)</p>
+                <p className="text-xs text-zinc-500 dark:text-zinc-100">
+                  PDF (up to 4MB)
+                </p>
               </div>
 
               {acceptedFiles &&
@@ -127,7 +133,7 @@ const UploadDropzone = (props: Props) => {
                       )}
                     />
                   </div>
-                  <div className="px-3 py-2 h-full text-sm truncate">
+                  <div className="px-3 py-2 h-full text-sm truncate text-white dark:text-black">
                     {acceptedFiles[0].name}
                   </div>
                 </div>
@@ -140,10 +146,10 @@ const UploadDropzone = (props: Props) => {
                       uploadProgress === 100 ? "bg-green-500" : "bg-blue-500"
                     }
                     value={uploadProgress}
-                    className="h-1 w-full bg-zinc-200"
+                    className="h-1 w-full"
                   />
                   {uploadProgress === 100 ? (
-                    <div className="flex gap-1 items-center justify-center text-sm text-zinc-700 text-center pt-2">
+                    <div className="flex gap-1 items-center justify-center text-sm text-center pt-2 text-zinc-700 dark:text-zinc-200">
                       <Loader2 className="h-3 w-3 animate-spin" />
                       Redirecting...
                     </div>
@@ -173,8 +179,8 @@ const UploadButton = (props: Props) => {
         <Button variant={"default"}>Upload PDF</Button>
       </DialogTrigger>
 
-      <DialogContent>
-        <UploadDropzone />
+      <DialogContent className="bg-white dark:bg-muted">
+        <UploadDropzone seIsOpen={setIsOpen} />
       </DialogContent>
     </Dialog>
   );

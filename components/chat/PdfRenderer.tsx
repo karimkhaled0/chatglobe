@@ -32,11 +32,10 @@ import {
 
 import SimpleBar from "simplebar-react";
 import PdfFullscreen from "./PdfFullscreen";
-// import PdfFullscreen from "./PdfFullscreen";
 
 pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.js`;
 
-export interface PdfRendererProps {
+interface PdfRendererProps {
   url: string;
 }
 
@@ -79,9 +78,10 @@ const PdfRenderer = ({ url }: PdfRendererProps) => {
     setCurrPage(Number(page));
     setValue("page", String(page));
   };
+
   return (
-    <div className="w-full rounded-md shadow flex flex-col items-center">
-      <div className="h-14 w-full border-b border-zinc-200 flex items-center justify-between px-2">
+    <div className="w-full bg-white dark:bg-muted rounded-md shadow flex flex-col items-center">
+      <div className="h-14 w-full border rounded-xl mb-1 border-zinc-200 dark:border-zinc-500 flex items-center justify-between px-2">
         <div className="flex items-center gap-1.5">
           <Button
             disabled={currPage <= 1}

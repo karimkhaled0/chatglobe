@@ -31,9 +31,9 @@ const Dashboard = (props: Props) => {
     },
   });
   return (
-    <div className="mx-auto max-w-7xl md:p-10 ">
+    <div className="mx-auto max-w-7xl md:p-10">
       <div
-        className="mt-8 flex flex-col items-start justify-between gap-4 border-b border-gray-200 pb-5 
+        className="mt-8 flex flex-col items-start justify-between gap-4 border-b border-gray-200 dark:border-gray-500 pb-5 
       sm:flex-row sm:items-center sm:gap-0"
       >
         <h1 className="mb-3 font-bold text-5xl text-gray-900 dark:text-gray-100">
@@ -46,7 +46,7 @@ const Dashboard = (props: Props) => {
       {/* display all user files */}
 
       {files && files?.length !== 0 ? (
-        <ul className="mt-8 grid grid-cols-1 gap-6 divide-y divide-zinc-200 md:grid-cols-2 lg:grid-cols-3">
+        <ul className="mt-8 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
           {files
             .sort(
               (a, b) =>
@@ -56,7 +56,7 @@ const Dashboard = (props: Props) => {
             .map((file) => (
               <li
                 key={file.id}
-                className="col-span-1 divide-y divide-gray-200 rounded-lg bg-white dark:bg-muted shadow transition hover:shadow-lg"
+                className="col-span-1 rounded-lg border dark:border-gray-500 shadow transition hover:shadow-lg"
               >
                 <Link
                   href={`/dashboard/${file.id}`}

@@ -6,6 +6,7 @@ import NavBar from "@/components/header/NavBar";
 import TRPCProvider from "@/components/providers/TRPCProvider";
 import ThemeProvider from "@/components/providers/ThemeProvider";
 import { Toaster } from "@/components/ui/toaster";
+import "simplebar-react/dist/simplebar.min.css";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -22,7 +23,12 @@ export default function RootLayout({
   return (
     <html lang="en" className="light">
       <TRPCProvider>
-        <body className={cn("min-h-screen font-sans", inter.className)}>
+        <body
+          className={cn(
+            "min-h-screen font-sans dark:bg-muted",
+            inter.className
+          )}
+        >
           <ThemeProvider
             attribute="class"
             defaultTheme="system"
