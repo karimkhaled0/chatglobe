@@ -6,5 +6,5 @@
         "use": "@vercel/next"
       }
     ],
-    "buildCommand": "npx prisma generate && next build && npx prisma migrate deploy"
+"buildCommand": "pnpm run production:build"
 }
