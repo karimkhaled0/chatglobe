@@ -40,6 +40,7 @@ const onUploadComplete = async ({
   });
 
   if (isFileExist) return;
+
   const createdFile = await db.file.create({
     data: {
       key: file.key,
@@ -50,7 +51,8 @@ const onUploadComplete = async ({
     },
   });
 
-  if (!createdFile) throw new Error("Failed to create file");
+  console.log("File Key:", file.key);
+  console.log("Created File ID:", createdFile.id);
 
   try {
     const response = await fetch(
