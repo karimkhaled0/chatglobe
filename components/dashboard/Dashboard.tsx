@@ -1,16 +1,20 @@
 "use client";
-import { Ghost, Loader2, MessageSquare, Plus, Trash } from "lucide-react";
-import { Skeleton } from "../ui/skeleton";
-import UploadButton from "./UploadButton";
+
 import { trpc } from "@/app/_trpc/client";
+import UploadButton from "./UploadButton";
+import { Ghost, Loader2, MessageSquare, Plus, Trash } from "lucide-react";
+import Skeleton from "react-loading-skeleton";
 import Link from "next/link";
 import { format } from "date-fns";
 import { Button } from "../ui/button";
 import { useState } from "react";
+import { getUserSubscriptionPlan } from "@/lib/stripe";
 
-type Props = {};
+interface PageProps {
+  subscriptionPlan: Awaited<ReturnType<typeof getUserSubscriptionPlan>>;
+}
 
-const Dashboard = (props: Props) => {
+const Dashboard = ({ subscriptionPlan }: PageProps) => {
   const [currentlyDeletingFile, setCurrentlyDeletingFile] = useState<
     string | null
   >(null);
@@ -30,6 +34,7 @@ const Dashboard = (props: Props) => {
       setCurrentlyDeletingFile(null);
     },
   });
+
   return (
     <div className="mx-auto max-w-7xl md:p-10">
       <div
@@ -40,7 +45,7 @@ const Dashboard = (props: Props) => {
           My Files
         </h1>
 
-        <UploadButton />
+        <UploadButton isSubscribed={subscriptionPlan.isSubscribed} />
       </div>
 
       {/* display all user files */}
@@ -82,7 +87,7 @@ const Dashboard = (props: Props) => {
 
                   <div className="flex items-center gap-2">
                     <MessageSquare className="h-4 w-4" />
-                    mocked
+                    {file.messages.length}
                   </div>
 
                   <Button

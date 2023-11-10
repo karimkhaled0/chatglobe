@@ -1,5 +1,6 @@
 import { db } from "@/db";
 import { openai } from "@/lib/openai";
+import { getPineconeClient } from "@/lib/pinecone";
 import { SendMessageValidator } from "@/lib/validators/SendMessageValidator";
 import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
 import { OpenAIEmbeddings } from "langchain/embeddings/openai";
@@ -7,7 +8,6 @@ import { PineconeStore } from "langchain/vectorstores/pinecone";
 import { NextRequest } from "next/server";
 
 import { OpenAIStream, StreamingTextResponse } from "ai";
-import { getPineconeClient } from "@/lib/pinecone";
 
 export const POST = async (req: NextRequest) => {
   // endpoint for asking a question to a pdf file
@@ -47,7 +47,7 @@ export const POST = async (req: NextRequest) => {
   });
 
   const pinecone = await getPineconeClient();
-  const pineconeIndex = pinecone.Index("chat-globe");
+  const pineconeIndex = pinecone.Index("quill");
 
   const vectorStore = await PineconeStore.fromExistingIndex(embeddings, {
     pineconeIndex,

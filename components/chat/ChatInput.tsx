@@ -1,10 +1,9 @@
-"use client";
-
-import { Button } from "../ui/button";
 import { Send } from "lucide-react";
+import { Button } from "../ui/button";
 import { Textarea } from "../ui/textarea";
 import { useContext, useRef } from "react";
 import { ChatContext } from "./ChatContext";
+
 interface ChatInputProps {
   isDisabled?: boolean;
 }
@@ -14,6 +13,7 @@ const ChatInput = ({ isDisabled }: ChatInputProps) => {
     useContext(ChatContext);
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+
   return (
     <div className="absolute bottom-0 left-0 w-full">
       <div className="mx-2 flex flex-row gap-3 md:mx-4 lg:mx-auto lg:max-w-2xl xl:max-w-3xl">

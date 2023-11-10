@@ -14,17 +14,20 @@ import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 
 type Props = {
-  seIsOpen: (isOpen: boolean) => void;
+  setIsOpen: (isOpen: boolean) => void;
+  isSubscribed: boolean;
 };
 
-const UploadDropzone = ({ seIsOpen }: Props) => {
+const UploadDropzone = ({ setIsOpen, isSubscribed }: Props) => {
   const router = useRouter();
 
   const [isUploading, setIsUploading] = useState<boolean>(false);
   const [uploadProgress, setUploadProgress] = useState<number>(0);
   const { toast } = useToast();
 
-  const { startUpload } = useUploadThing("pdfUploader");
+  const { startUpload } = useUploadThing(
+    isSubscribed ? "proPlanUploader" : "freePlanUploader"
+  );
 
   const { mutate: startPolling } = trpc.getFile.useMutation({
     onSuccess: (file) => {
@@ -71,7 +74,7 @@ const UploadDropzone = ({ seIsOpen }: Props) => {
         const res = await startUpload(acceptedFile);
 
         if (!res) {
-          seIsOpen(false);
+          setIsOpen(false);
           return toast({
             title: "Something went wrong",
             description: "Please try again later",
@@ -84,7 +87,7 @@ const UploadDropzone = ({ seIsOpen }: Props) => {
         const key = fileResponse?.key;
 
         if (!key) {
-          seIsOpen(false);
+          setIsOpen(false);
           return toast({
             title: "Something went wrong",
             description: "Please try again later",
@@ -115,7 +118,7 @@ const UploadDropzone = ({ seIsOpen }: Props) => {
                   and drop
                 </p>
                 <p className="text-xs text-zinc-500 dark:text-zinc-100">
-                  PDF (up to 4MB)
+                  PDF (up to {isSubscribed ? "16" : "4"}MB)
                 </p>
               </div>
 
@@ -171,8 +174,9 @@ const UploadDropzone = ({ seIsOpen }: Props) => {
   );
 };
 
-const UploadButton = (props: Props) => {
-  const [isOpen, setIsOpen] = useState(false);
+const UploadButton = ({ isSubscribed }: { isSubscribed: boolean }) => {
+  const [isOpen, setIsOpen] = useState<boolean>(false);
+
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger onClick={() => setIsOpen(true)} asChild>
@@ -180,7 +184,7 @@ const UploadButton = (props: Props) => {
       </DialogTrigger>
 
       <DialogContent className="bg-white dark:bg-muted">
-        <UploadDropzone seIsOpen={setIsOpen} />
+        <UploadDropzone setIsOpen={setIsOpen} isSubscribed={isSubscribed} />
       </DialogContent>
     </Dialog>
   );

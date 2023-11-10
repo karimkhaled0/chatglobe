@@ -1,4 +1,4 @@
-import { createContext, useRef, useState } from "react";
+import { ReactNode, createContext, useRef, useState } from "react";
 import { useToast } from "../ui/use-toast";
 import { useMutation } from "@tanstack/react-query";
 import { trpc } from "@/app/_trpc/client";
@@ -20,7 +20,7 @@ export const ChatContext = createContext<StreamResponse>({
 
 interface Props {
   fileId: string;
-  children: React.ReactNode;
+  children: ReactNode;
 }
 
 export const ChatContextProvider = ({ fileId, children }: Props) => {
