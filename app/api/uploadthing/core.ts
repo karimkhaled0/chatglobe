@@ -33,34 +33,28 @@ const onUploadComplete = async ({
     url: string;
   };
 }) => {
-  let createdFile;
-  try {
-    // Check if the file already exists in the database
-    const isFileExist = await db.file.findFirst({
-      where: {
-        key: file.key,
-      },
-    });
-
-    if (isFileExist) {
-      return;
-    }
-
-    // Create the file entry in the database
-    createdFile = await db.file.create({
-      data: {
-        key: file.key,
-        name: file.name,
-        userId: metadata.userId,
-        url: `https://uploadthing-prod.s3.us-west-2.amazonaws.com/${file.key}`,
-        uploadStatus: "PROCESSING",
-      },
-    });
-  } catch (error) {
-    console.error("Error creating file in the database:", error);
-    // Handle the error, update status, etc.
-    return;
+  if (!file || !file.key) {
+    console.error("Error: Missing or invalid key in the file object", file);
+    // Handle the error as needed, e.g., update status, throw an exception, etc.
+    throw new Error("Missing or invalid key in the file object");
   }
+  const isFileExist = await db.file.findFirst({
+    where: {
+      key: file.key,
+    },
+  });
+
+  if (isFileExist) return;
+
+  const createdFile = await db.file.create({
+    data: {
+      key: file.key,
+      name: file.name,
+      userId: metadata.userId,
+      url: `https://uploadthing-prod.s3.us-west-2.amazonaws.com/${file.key}`,
+      uploadStatus: "PROCESSING",
+    },
+  });
 
   try {
     const response = await fetch(
