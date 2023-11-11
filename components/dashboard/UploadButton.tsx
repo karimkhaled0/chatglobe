@@ -84,7 +84,7 @@ const UploadDropzone = ({ setIsOpen, isSubscribed }: Props) => {
 
         const [fileResponse] = res;
 
-        const key = fileResponse?.key;
+        const key = fileResponse.key;
 
         if (!key) {
           setIsOpen(false);
