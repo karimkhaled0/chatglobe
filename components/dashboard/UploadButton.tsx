@@ -12,6 +12,7 @@ import { useToast } from "../ui/use-toast";
 import { trpc } from "@/app/_trpc/client";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
+import { $Enums } from "@prisma/client";
 
 type Props = {
   setIsOpen: (isOpen: boolean) => void;
@@ -30,7 +31,16 @@ const UploadDropzone = ({ setIsOpen, isSubscribed }: Props) => {
   );
 
   const { mutate: startPolling } = trpc.getFile.useMutation({
-    onSuccess: (file) => {
+    onSuccess: (file: {
+      key: string;
+      id: string;
+      userId: string | null;
+      name: string;
+      uploadStatus: $Enums.UploadStatus;
+      url: string;
+      createdAt: string;
+      updatedAt: string;
+    }) => {
       router.push(`/dashboard/${file.id}`);
     },
     retry: true,
@@ -83,7 +93,7 @@ const UploadDropzone = ({ setIsOpen, isSubscribed }: Props) => {
         }
 
         const [fileResponse] = res;
-        // key is the file id
+
         const key = fileResponse.key;
 
         if (!key) {

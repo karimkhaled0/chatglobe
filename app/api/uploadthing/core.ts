@@ -8,10 +8,11 @@ import { PineconeStore } from "langchain/vectorstores/pinecone";
 import { getPineconeClient } from "@/lib/pinecone";
 import { getUserSubscriptionPlan } from "@/lib/stripe";
 import { PLANS } from "@/config/stripe";
+import { createFile } from "@/lib/createFile";
 
 const f = createUploadthing();
 
-const middleware = async () => {
+export const middleware = async () => {
   const { getUser } = getKindeServerSession();
   const user = getUser();
 
@@ -46,17 +47,7 @@ const onUploadComplete = async ({
 
   if (isFileExist) return;
 
-  const createdFile = await db.file.create({
-    data: {
-      key: file.key,
-      name: file.name,
-      userId: metadata.userId,
-      url: `https://uploadthing-prod.s3.us-west-2.amazonaws.com/${file.key}`,
-      uploadStatus: "PROCESSING",
-    },
-  });
-
-  if (!createdFile) return;
+  const createdFile = await createFile({ file, metadata });
 
   try {
     const response = await fetch(
