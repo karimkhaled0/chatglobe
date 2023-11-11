@@ -16,5 +16,7 @@ export const POST = async (req: NextRequest) => {
     },
   });
   if (!createdFile) return new Response("Failed", { status: 400 });
-  return createdFile;
+
+  // return createdFile
+  return new Response(JSON.stringify(createdFile), { status: 200 });
 };
