@@ -83,7 +83,7 @@ const UploadDropzone = ({ setIsOpen, isSubscribed }: Props) => {
         }
 
         const [fileResponse] = res;
-
+        // key is the file id
         const key = fileResponse.key;
 
         if (!key) {
