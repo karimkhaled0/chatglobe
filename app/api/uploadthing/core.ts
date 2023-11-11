@@ -33,6 +33,7 @@ const onUploadComplete = async ({
     url: string;
   };
 }) => {
+  console.log(file, metadata);
   const isFileExist = await db.file.findFirst({
     where: {
       key: file.key,
@@ -50,6 +51,8 @@ const onUploadComplete = async ({
       uploadStatus: "PROCESSING",
     },
   });
+
+  console.log(createdFile.id, createdFile);
 
   if (createdFile.id) {
     try {
