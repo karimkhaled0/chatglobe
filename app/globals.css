@@ -83,5 +83,5 @@
 }
 
 .skeleton-gradient {
-  @apply bg-gray-300 dark:bg-muted bg-gradient-to-t dark:from-[#0c0a09] from-white to-transparent
+  @apply bg-gray-300 dark:bg-muted bg-gradient-to-t dark:from-[#1b1714] from-white to-transparent
 }

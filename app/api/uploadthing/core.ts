@@ -8,7 +8,6 @@ import { PineconeStore } from "langchain/vectorstores/pinecone";
 import { getPineconeClient } from "@/lib/pinecone";
 import { getUserSubscriptionPlan } from "@/lib/stripe";
 import { PLANS } from "@/config/stripe";
-import { createFile } from "@/lib/createFile";
 
 const f = createUploadthing();
 
@@ -47,7 +46,15 @@ const onUploadComplete = async ({
 
   if (isFileExist) return;
 
-  const createdFile = await createFile({ file, metadata });
+  const response = await fetch(`${process.env.KINDE_SITE_URL}/api/createFile`, {
+    body: JSON.stringify({
+      file,
+      metadata,
+    }),
+    method: "POST",
+  });
+
+  const createdFile = await response.json();
 
   try {
     const response = await fetch(
