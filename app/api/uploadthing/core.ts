@@ -33,85 +33,57 @@ const onUploadComplete = async ({
     url: string;
   };
 }) => {
-  console.log(file, metadata);
-  const isFileExist = await db.file.findFirst({
-    where: {
-      key: file.key,
-    },
-  });
+  let createdFile;
+  try {
+    // Check if the file already exists in the database
+    const isFileExist = await db.file.findFirst({
+      where: {
+        key: file.key,
+      },
+    });
 
-  if (isFileExist) return;
+    if (isFileExist) {
+      return;
+    }
 
-  const createdFile = await db.file.create({
-    data: {
-      key: file.key,
-      name: file.name,
-      userId: metadata.userId,
-      url: `https://uploadthing-prod.s3.us-west-2.amazonaws.com/${file.key}`,
-      uploadStatus: "PROCESSING",
-    },
-  });
+    // Create the file entry in the database
+    createdFile = await db.file.create({
+      data: {
+        key: file.key,
+        name: file.name,
+        userId: metadata.userId,
+        url: `https://uploadthing-prod.s3.us-west-2.amazonaws.com/${file.key}`,
+        uploadStatus: "PROCESSING",
+      },
+    });
+  } catch (error) {
+    console.error("Error creating file in the database:", error);
+    // Handle the error, update status, etc.
+    return;
+  }
 
-  console.log(createdFile.id, createdFile);
+  try {
+    const response = await fetch(
+      `https://uploadthing-prod.s3.us-west-2.amazonaws.com/${file.key}`
+    );
 
-  if (createdFile.id) {
-    try {
-      const response = await fetch(
-        `https://uploadthing-prod.s3.us-west-2.amazonaws.com/${file.key}`
-      );
+    const blob = await response.blob();
 
-      const blob = await response.blob();
+    const loader = new PDFLoader(blob);
 
-      const loader = new PDFLoader(blob);
+    const pageLevelDocs = await loader.load();
 
-      const pageLevelDocs = await loader.load();
+    const pagesAmt = pageLevelDocs.length;
 
-      const pagesAmt = pageLevelDocs.length;
+    const { subscriptionPlan } = metadata;
+    const { isSubscribed } = subscriptionPlan;
 
-      const { subscriptionPlan } = metadata;
-      const { isSubscribed } = subscriptionPlan;
+    const isProExceeded =
+      pagesAmt > PLANS.find((plan) => plan.name === "Pro")!.pagesPerPdf;
+    const isFreeExceeded =
+      pagesAmt > PLANS.find((plan) => plan.name === "Free")!.pagesPerPdf;
 
-      const isProExceeded =
-        pagesAmt > PLANS.find((plan) => plan.name === "Pro")!.pagesPerPdf;
-      const isFreeExceeded =
-        pagesAmt > PLANS.find((plan) => plan.name === "Free")!.pagesPerPdf;
-
-      if (
-        (isSubscribed && isProExceeded) ||
-        (!isSubscribed && isFreeExceeded)
-      ) {
-        await db.file.update({
-          data: {
-            uploadStatus: "FAILED",
-          },
-          where: {
-            id: createdFile.id,
-          },
-        });
-      }
-
-      // vectorize and index entire document
-      const pinecone = await getPineconeClient();
-      const pineconeIndex = pinecone.Index("chat-globe");
-
-      const embeddings = new OpenAIEmbeddings({
-        openAIApiKey: process.env.OPENAI_API_KEY,
-      });
-
-      await PineconeStore.fromDocuments(pageLevelDocs, embeddings, {
-        pineconeIndex,
-        // namespace: createdFile.id,
-      });
-
-      await db.file.update({
-        data: {
-          uploadStatus: "SUCCESS",
-        },
-        where: {
-          id: createdFile.id,
-        },
-      });
-    } catch (err) {
+    if ((isSubscribed && isProExceeded) || (!isSubscribed && isFreeExceeded)) {
       await db.file.update({
         data: {
           uploadStatus: "FAILED",
@@ -121,8 +93,37 @@ const onUploadComplete = async ({
         },
       });
     }
-  } else {
-    throw new Error("File not created");
+
+    // vectorize and index entire document
+    const pinecone = await getPineconeClient();
+    const pineconeIndex = pinecone.Index("chat-globe");
+
+    const embeddings = new OpenAIEmbeddings({
+      openAIApiKey: process.env.OPENAI_API_KEY,
+    });
+
+    await PineconeStore.fromDocuments(pageLevelDocs, embeddings, {
+      pineconeIndex,
+      // namespace: createdFile.id,
+    });
+
+    await db.file.update({
+      data: {
+        uploadStatus: "SUCCESS",
+      },
+      where: {
+        id: createdFile.id,
+      },
+    });
+  } catch (err) {
+    await db.file.update({
+      data: {
+        uploadStatus: "FAILED",
+      },
+      where: {
+        id: createdFile.id,
+      },
+    });
   }
 };
 
