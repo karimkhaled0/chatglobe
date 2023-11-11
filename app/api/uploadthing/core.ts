@@ -51,29 +51,64 @@ const onUploadComplete = async ({
     },
   });
 
+  if (createdFile.id) {
+    try {
+      const response = await fetch(
+        `https://uploadthing-prod.s3.us-west-2.amazonaws.com/${file.key}`
+      );
 
-  try {
-    const response = await fetch(
-      `https://uploadthing-prod.s3.us-west-2.amazonaws.com/${file.key}`
-    );
+      const blob = await response.blob();
 
-    const blob = await response.blob();
+      const loader = new PDFLoader(blob);
 
-    const loader = new PDFLoader(blob);
+      const pageLevelDocs = await loader.load();
 
-    const pageLevelDocs = await loader.load();
+      const pagesAmt = pageLevelDocs.length;
 
-    const pagesAmt = pageLevelDocs.length;
+      const { subscriptionPlan } = metadata;
+      const { isSubscribed } = subscriptionPlan;
 
-    const { subscriptionPlan } = metadata;
-    const { isSubscribed } = subscriptionPlan;
+      const isProExceeded =
+        pagesAmt > PLANS.find((plan) => plan.name === "Pro")!.pagesPerPdf;
+      const isFreeExceeded =
+        pagesAmt > PLANS.find((plan) => plan.name === "Free")!.pagesPerPdf;
 
-    const isProExceeded =
-      pagesAmt > PLANS.find((plan) => plan.name === "Pro")!.pagesPerPdf;
-    const isFreeExceeded =
-      pagesAmt > PLANS.find((plan) => plan.name === "Free")!.pagesPerPdf;
+      if (
+        (isSubscribed && isProExceeded) ||
+        (!isSubscribed && isFreeExceeded)
+      ) {
+        await db.file.update({
+          data: {
+            uploadStatus: "FAILED",
+          },
+          where: {
+            id: createdFile.id,
+          },
+        });
+      }
 
-    if ((isSubscribed && isProExceeded) || (!isSubscribed && isFreeExceeded)) {
+      // vectorize and index entire document
+      const pinecone = await getPineconeClient();
+      const pineconeIndex = pinecone.Index("chat-globe");
+
+      const embeddings = new OpenAIEmbeddings({
+        openAIApiKey: process.env.OPENAI_API_KEY,
+      });
+
+      await PineconeStore.fromDocuments(pageLevelDocs, embeddings, {
+        pineconeIndex,
+        // namespace: createdFile.id,
+      });
+
+      await db.file.update({
+        data: {
+          uploadStatus: "SUCCESS",
+        },
+        where: {
+          id: createdFile.id,
+        },
+      });
+    } catch (err) {
       await db.file.update({
         data: {
           uploadStatus: "FAILED",
@@ -83,37 +118,8 @@ const onUploadComplete = async ({
         },
       });
     }
-
-    // vectorize and index entire document
-    const pinecone = await getPineconeClient();
-    const pineconeIndex = pinecone.Index("chat-globe");
-
-    const embeddings = new OpenAIEmbeddings({
-      openAIApiKey: process.env.OPENAI_API_KEY,
-    });
-
-    await PineconeStore.fromDocuments(pageLevelDocs, embeddings, {
-      pineconeIndex,
-      // namespace: createdFile.id,
-    });
-
-    await db.file.update({
-      data: {
-        uploadStatus: "SUCCESS",
-      },
-      where: {
-        id: createdFile.id,
-      },
-    });
-  } catch (err) {
-    await db.file.update({
-      data: {
-        uploadStatus: "FAILED",
-      },
-      where: {
-        id: createdFile.id,
-      },
-    });
+  } else {
+    throw new Error("File not created");
   }
 };
 
