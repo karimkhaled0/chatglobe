@@ -11,7 +11,7 @@ import { PLANS } from "@/config/stripe";
 
 const f = createUploadthing();
 
-export const middleware = async () => {
+const middleware = async () => {
   const { getUser } = getKindeServerSession();
   const user = getUser();
 
@@ -33,11 +33,6 @@ const onUploadComplete = async ({
     url: string;
   };
 }) => {
-  if (!file || !file.key) {
-    console.error("Error: Missing or invalid key in the file object", file);
-    // Handle the error as needed, e.g., update status, throw an exception, etc.
-    throw new Error("Missing or invalid key in the file object");
-  }
   const isFileExist = await db.file.findFirst({
     where: {
       key: file.key,
@@ -46,15 +41,15 @@ const onUploadComplete = async ({
 
   if (isFileExist) return;
 
-  const response = await fetch(`${process.env.KINDE_SITE_URL}/api/createFile`, {
-    body: JSON.stringify({
-      file,
-      metadata,
-    }),
-    method: "POST",
+  const createdFile = await db.file.create({
+    data: {
+      key: file.key,
+      name: file.name,
+      userId: metadata.userId,
+      url: `https://uploadthing-prod.s3.us-west-2.amazonaws.com/${file.key}`,
+      uploadStatus: "PROCESSING",
+    },
   });
-
-  const createdFile = await response.json();
 
   try {
     const response = await fetch(
